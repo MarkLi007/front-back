@@ -1,6 +1,5 @@
 
 import { toast } from "../hooks/use-toast";
-import { api } from "./api";
 
 export interface User {
   id: string;
@@ -61,52 +60,6 @@ export function logout(): void {
   localStorage.removeItem("userRole");
   window.location.href = "/";
 }
-
-export async function login(wallet_address: string, password?: string): Promise<any> {
-  try {
-    const response = await api.post("/user/login", {
-      wallet_address,
-      password
-    });
-    if(response.token){
-      localStorage.setItem("token", response.token);
-    }
-    
-    return response;
-  } catch (error:any) {
-    throw new Error(error.message || "Login failed");
-  }
-}
-
-export async function register(wallet_address: string, password?: string): Promise<any> {
-  try {
-    const response = await api.post("/user/register", {
-      wallet_address,
-      password,
-    });
-
-    if(response.token){
-      localStorage.setItem("token", response.token);
-    }
-    return response;
-  } catch (error:any) {
-    throw new Error(error.message || "Registration failed");
-  }
-}
-
-export async function getNickname(wallet_address: string): Promise<any> {
-  try {
-    const response = await api.get(`/user/nickname/${wallet_address}`);
-    return response;
-  } catch (error:any) {
-    throw new Error(error.message || "get nickname failed");
-  }
-}
-export async function setNickname(wallet_address: string, nickname:string): Promise<any> {
-  const response = await api.post("/user/nickname",{wallet_address,nickname});
-  return response;
-}
-
 
 export function getToken(): string | null {
   return localStorage.getItem("token");

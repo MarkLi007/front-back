@@ -4,6 +4,7 @@ import { getContractReadOnly, Role, mapRoleToString } from "@/utils/contract";
 import { Users, UserCheck, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
@@ -31,47 +32,33 @@ export default function ReviewersListTab() {
       const events = await contract.queryFilter(filter, 0, "latest");
       
       // Map to addresses and remove duplicates
-      const reviewerAddresses = [...new Set(
-        events.map(event => {
-          // For ethers v6, we need to parse the event log differently
-          let user = "";
-          let role = 0;
+      const reviewerEvents: RoleEvent[] = [];
+      
+      for (const event of events) {
+        try {
+          // For ethers v6, we need to parse the event data
+          const parsedLog = contract.interface.parseLog({
+            topics: event.topics as string[],
+            data: event.data
+          });
           
-          // Check if this is an ethers v6 EventLog (has decode method)
-          if ('args' in event) {
-            // This is an EventLog with parsed args
-            user = event.args[0] || "";
-            role = Number(event.args[1] || 0);
-          } else {
-            // This is a raw Log, we need to decode it manually
-            // Get the event fragment for RoleAssigned
-            const iface = new ethers.Interface([
-              "event RoleAssigned(address indexed user, uint8 indexed role)"
-            ]);
-            // Try to decode the log
-            try {
-              const decodedLog = iface.parseLog({
-                topics: event.topics,
-                data: event.data
-              });
-              if (decodedLog) {
-                user = decodedLog.args[0] || "";
-                role = Number(decodedLog.args[1] || 0);
-              }
-            } catch (e) {
-              console.error("Failed to decode log:", e);
-            }
+          if (parsedLog && parsedLog.args) {
+            reviewerEvents.push({
+              user: parsedLog.args[0],
+              role: Number(parsedLog.args[1]),
+              blockNumber: event.blockNumber
+            });
           }
-          
-          return {
-            user,
-            role,
-            blockNumber: event.blockNumber
-          };
-        })
-        .filter(event => event.role === Role.REVIEWER && event.user)
-        .sort((a, b) => b.blockNumber - a.blockNumber) // Sort by block number descending
-        .map(event => event.user)
+        } catch (error) {
+          console.error("Error parsing event log:", error);
+        }
+      }
+      
+      const reviewerAddresses = [...new Set(
+        reviewerEvents
+          .filter(event => event.role === Role.REVIEWER)
+          .sort((a, b) => b.blockNumber - a.blockNumber)
+          .map(event => event.user)
       )];
       
       // Filter to ensure they still have the REVIEWER role

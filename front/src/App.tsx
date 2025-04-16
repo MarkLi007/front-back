@@ -17,6 +17,7 @@ import PaperDetail from "./pages/PaperDetail";
 import AddVersion from "./pages/AddVersion";
 import AdminPanel from "./pages/AdminPanel";
 import NFTMarketplace from "./pages/NFTMarketplace";
+import UserProfile from "./pages/UserProfile";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/paper/:id/add-version" element={<AddVersion />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/nft-marketplace" element={<NFTMarketplace />} />
+            <Route path="/profile" element={<UserProfile />} />
             
             {/* Catch-all not found route */}
             <Route path="*" element={<NotFound />} />

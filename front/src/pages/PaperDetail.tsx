@@ -3,12 +3,11 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import { useAuth } from "../contexts/AuthContext";
-import { api } from "../utils/api";
 import { getContract, getContractReadOnly, PaperStatus, mapStatusToString } from "../utils/contract";
 import { getIPFSGatewayUrl } from "../utils/ipfs";
 import { getDiff } from "../utils/diff";
 import { Button } from "../components/ui/button";
-
+import { Input } from "../components/ui/input";
 import { 
   FileText, 
   Calendar, 
@@ -33,6 +32,7 @@ import DiffViewer from "../components/DiffViewer";
 import { cn } from "@/lib/utils";
 import { toast } from "../hooks/use-toast";
 import { DiffChunk } from "../utils/diff";
+
 interface Version {
   ipfsHash: string;
   fileHash: string;
@@ -64,10 +64,6 @@ export default function PaperDetail() {
   const [diffVerB, setDiffVerB] = useState<string>("1");
   const [diffResult, setDiffResult] = useState<DiffChunk[] | null>(null);
   const [isDiffLoading, setIsDiffLoading] = useState(false);
-  const [citations, setCitations] = useState<number | null>(null);
-  const [influence, setInfluence] = useState<number | null>(null);
-
-  const [showDiff, setShowDiff] = useState(false);
   
   // For admin actions
   const [isApproving, setIsApproving] = useState(false);
@@ -90,8 +86,6 @@ export default function PaperDetail() {
       loadPaper();
     }
   }, [id]);
-
-  
 
   async function loadPaper() {
     if (!id) return;
@@ -139,18 +133,6 @@ export default function PaperDetail() {
         setDiffVerA("0");
         setDiffVerB((versionCount - 1).toString());
       }
-      if (id){
-          const citationsCount = await api.getPaperCitations(id)
-          const influenceScore = await api.getPaperInfluence(id)
-
-          if(citationsCount){
-              setCitations(citationsCount)
-          }
-          if (influenceScore) {
-              setInfluence(influenceScore)
-          }
-      }
-
     } catch (error) {
       console.error("Error loading paper:", error);
       toast({
@@ -442,7 +424,6 @@ export default function PaperDetail() {
               {/* Content Tab */}
               <TabsContent value="content" className="mt-4">
                 <div className="paper-card">
-                <h3 className="text-lg font-semibold text-paper-primary mb-4">论文摘要：</h3>
                   {canViewPDF ? (
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
@@ -497,9 +478,6 @@ export default function PaperDetail() {
                 </div>
                 
                 {/* Comments */}
-                <div>
-                <h3 className="text-lg font-semibold text-paper-primary mb-4">评论区</h3>
-                </div>
                 <CommentSection paperId={paper.paperId} />
               </TabsContent>
               
@@ -582,17 +560,6 @@ export default function PaperDetail() {
                 <div className="paper-card">
                   <h3 className="text-lg font-semibold text-paper-primary mb-4">版本差异对比</h3>
                   
-                  {showDiff &&(
-                      <DiffViewer 
-                          paperId={paper.paperId}
-                          verA={diffVerA}
-                          verB={diffVerB}
-                      />
-                  )}
-                  <Button onClick={()=>setShowDiff(!showDiff)}>
-                      {showDiff ? "关闭版本对比" : "显示版本对比"}
-                  </Button>
-
                   {paper.versionCount < 2 ? (
                     <p className="text-gray-600">需要至少两个版本才能进行对比</p>
                   ) : (
@@ -644,6 +611,7 @@ export default function PaperDetail() {
                         </div>
                       </div>
                       
+                      <DiffViewer diff={diffResult || []} isLoading={isDiffLoading} />
                     </>
                   )}
                 </div>
@@ -689,20 +657,6 @@ export default function PaperDetail() {
             <div className="paper-card mb-6">
               <h3 className="text-lg font-semibold text-paper-primary mb-4">论文信息</h3>
               
-                <div>
-                    <div className="text-sm text-gray-500">引用次数</div>
-                    <div className="flex items-center mt-1">
-                        <FileText className="h-4 w-4 text-paper-primary mr-2" />
-                        <span>{citations || 0}</span>
-                    </div>
-                </div>
-                <div>
-                    <div className="text-sm text-gray-500">影响力评分</div>
-                    <div className="flex items-center mt-1">
-                        <FileText className="h-4 w-4 text-paper-primary mr-2" />
-                        <span>{influence || 0}</span>
-                    </div>
-                </div>
               <div className="space-y-3">
                 <div>
                   <div className="text-sm text-gray-500">提交者</div>

@@ -1,8 +1,6 @@
-import { Paper } from "@/types/paper";
-import { api } from "@/utils/api";
+
 import { Layout, Code, Users } from "lucide-react";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+
 const FeatureCard = ({ 
   icon: Icon, 
   title, 
@@ -23,9 +21,7 @@ const FeatureCard = ({
   );
 };
 
-const Features = ({
-}: { }) => {
-  const [hotPapers, setHotPapers] = useState<Paper[]>([]);
+const Features = () => {
   const features = [
     {
       icon: Layout,
@@ -43,27 +39,12 @@ const Features = ({
       description: "简洁直观的界面设计，让用户能够轻松理解和使用您的应用或网站。",
     },
   ];
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const hotPapersData = await api.getHotPapers();
-        setHotPapers(hotPapersData);
-      } catch (error) {
-        console.error("Failed to fetch hot papers:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   return (
     <section id="features" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            核心特点
-          </h2>
-
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">核心特点</h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             这个空白页项目提供了一些基本功能，您可以在此基础上继续构建。
           </p>
@@ -71,34 +52,17 @@ const Features = ({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
+            <FeatureCard 
+              key={index} 
+              icon={feature.icon} 
+              title={feature.title} 
+              description={feature.description} 
             />
           ))}
-        </div>
-
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">热门论文推荐</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {hotPapers.map((paper) => (
-              <Link href={`/PaperDetail/${paper.id}`} key={paper.id}>
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{paper.title}</h3>
-                <p className="text-gray-600 mb-2">作者: {paper.author}</p>
-                <p className="text-gray-700">
-                  {paper.abstract.length > 100 ? paper.abstract.slice(0,100) + "..." : paper.abstract}
-                </p>
-              </div>
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </section>
   );
 };
-export default Features;
+
 export default Features;

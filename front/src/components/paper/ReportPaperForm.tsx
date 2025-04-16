@@ -119,9 +119,10 @@ export default function ReportPaperForm({ paperId }: ReportPaperFormProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value={String(ReportType.FRAUD)}>学术造假</SelectItem>
-                  <SelectItem value={String(ReportType.DUPLICATE)}>重复提交</SelectItem>
-                  <SelectItem value={String(ReportType.INACCURACY)}>内容不准确</SelectItem>
+                  <SelectItem value={String(ReportType.PLAGIARISM)}>学术抄袭</SelectItem>
+                  <SelectItem value={String(ReportType.FALSIFICATION)}>数据造假</SelectItem>
+                  <SelectItem value={String(ReportType.COPYRIGHT_VIOLATION)}>版权侵犯</SelectItem>
+                  <SelectItem value={String(ReportType.OTHER)}>其他问题</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

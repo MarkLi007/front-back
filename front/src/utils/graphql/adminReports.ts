@@ -43,7 +43,7 @@ export async function getPaperReports(): Promise<PaperReport[]> {
               reports.push({
                 paperId,
                 reportIndex: i,
-                reportType: ReportType.FRAUD, // Placeholder
+                reportType: ReportType.PLAGIARISM, // Updated from FRAUD to PLAGIARISM
                 reason: "疑似抄袭已发表文献", // Placeholder
                 reporter: "0x1234...5678", // Placeholder
                 timestamp: Math.floor(Date.now() / 1000) - i * 3600, // Placeholder

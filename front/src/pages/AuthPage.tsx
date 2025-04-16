@@ -1,20 +1,18 @@
-import React, { useState, useContext } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+
+import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import LoginForm from "../components/LoginForm";
 import RegisterForm from "../components/RegisterForm";
+import { isAuthenticated } from "../utils/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { AuthContext } from "../contexts/AuthContext";
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
-  const { isLoggedIn } = useContext(AuthContext);
   
-    const navigate = useNavigate();
   // Redirect if already authenticated
-  if (isLoggedIn) {
-      navigate("/");
-      return null
+  if (isAuthenticated()) {
+    return <Navigate to="/" replace />;
   }
 
   return (

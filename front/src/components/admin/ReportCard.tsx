@@ -32,24 +32,24 @@ export function ReportCard({
   
   function getReportTypeString(type: ReportType): string {
     switch (type) {
-      case ReportType.FRAUD:
-        return "学术造假";
-      case ReportType.DUPLICATE:
-        return "重复提交";
-      case ReportType.INACCURACY:
-        return "内容不准确";
+      case ReportType.PLAGIARISM:
+        return "学术抄袭";
+      case ReportType.FALSIFICATION:
+        return "数据造假";
+      case ReportType.COPYRIGHT_VIOLATION:
+        return "版权侵犯";
       default:
-        return "未知原因";
+        return "其他问题";
     }
   }
 
   function getReportTypeColor(type: ReportType): string {
     switch (type) {
-      case ReportType.FRAUD:
+      case ReportType.PLAGIARISM:
         return "bg-red-100 text-red-800";
-      case ReportType.DUPLICATE:
+      case ReportType.FALSIFICATION:
         return "bg-yellow-100 text-yellow-800";
-      case ReportType.INACCURACY:
+      case ReportType.COPYRIGHT_VIOLATION:
         return "bg-orange-100 text-orange-800";
       default:
         return "bg-gray-100 text-gray-800";
