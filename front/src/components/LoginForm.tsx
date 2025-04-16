@@ -1,8 +1,7 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../utils/auth";
-import { Button } from "./ui/button";
+import { Button } from "./ui/button"
 import { Input } from "./ui/input";
 import { LogIn } from "lucide-react";
 import { toast } from "../hooks/use-toast";
@@ -12,49 +11,51 @@ interface LoginFormProps {
   onRegisterClick?: () => void;
 }
 
-export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+import { login } from "../utils/auth";
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    
-    if (!username.trim() || !password.trim()) {
-      toast({
-        title: "输入错误",
-        description: "请输入用户名和密码",
-        variant: "destructive"
-      });
-      return;
+export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps) {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+
+        if (!username.trim() || !password.trim()) {
+            toast({
+                title: "输入错误",
+                description: "请输入钱包地址和密码",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            await login(username, password);
+            toast({
+                title: "登录成功",
+                description: `欢迎回来, ${username}`,
+            });
+            setUsername("");
+            setPassword("");
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                navigate("/");
+            }
+        } catch (error) {
+            toast({
+                title: "登录失败",
+                description: (error as Error).message,
+                variant: "destructive"
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }
-    
-    setIsLoading(true);
-    
-    try {
-      const { token, role } = await login(username, password);
-      
-      toast({
-        title: "登录成功",
-        description: `欢迎回来, ${username}`,
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      toast({
-        title: "登录失败",
-        description: (error as Error).message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   return (
     <div className="paper-card max-w-md mx-auto">
@@ -62,7 +63,7 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
       
       <form onSubmit={handleSubmit} className="paper-form space-y-4">
         <div className="form-group">
-          <label htmlFor="username">用户名</label>
+          <label htmlFor="username">钱包地址</label>
           <Input
             id="username"
             value={username}
@@ -104,7 +105,7 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
         <p className="text-sm text-gray-600">
           还没有账号？
           <button
-            onClick={onRegisterClick}
+            onClick={()=>{onRegisterClick && onRegisterClick()}}
             className="ml-1 text-paper-primary hover:underline"
             disabled={isLoading}
           >

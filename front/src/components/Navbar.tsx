@@ -1,10 +1,11 @@
 
-import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "./ui/button";
-import { useAuth } from "../contexts/AuthContext";
-import { getContractReadOnly, Role } from "../utils/contract";
-import { AlertCircle, FileText, Home, Search, Upload, User, Users, Tag } from "lucide-react";
+import { useContext, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { getContractReadOnly, Role } from "@/utils/contract";
+import { AuthContext } from "@/contexts/AuthContext";
+import { AlertCircle, FileText, Home, Search, Upload, User, Users, Tag, LogOut } from "lucide-react";
+
 
 export default function Navbar() {
   const location = useLocation();
@@ -12,6 +13,8 @@ export default function Navbar() {
   const [role, setRole] = useState<Role>(Role.NONE);
   const [isAdmin, setIsAdmin] = useState(false);
   
+  const { isLoggedIn, nickname, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   // Check if current route is active
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -45,7 +48,7 @@ export default function Navbar() {
     <header className="bg-white border-b border-gray-200 py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center mb-4 md:mb-0">
+          <div className="flex items-center mb-4 md:mb-0 ">
             <Link to="/" className="flex items-center text-2xl font-bold text-paper-primary">
               <FileText className="mr-2 h-6 w-6" />
               <span>论文注册</span>
@@ -89,17 +92,30 @@ export default function Navbar() {
               </>
             )}
             
-            {!isConnected ? (
+            {!isLoggedIn ? (
               <Button className="paper-btn-primary text-sm" onClick={connectWallet}>
-                连接钱包
+                <Link to="/auth">连接钱包</Link>
               </Button>
             ) : (
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/auth" className="flex items-center">
-                  <span className="truncate max-w-[80px]">
-                    {currentAccount?.slice(0, 6)}...{currentAccount?.slice(-4)}
-                  </span>
-                </Link>
+              <Button className="paper-btn-primary text-sm flex items-center">
+                <span className="truncate max-w-[80px]">
+                  {nickname}
+                </span>
+                <Button
+                  className="ml-2 paper-btn-primary text-sm flex items-center"
+                  onClick={() => {
+                    logout()
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-1" />
+                  退出
+                </Button>
+                {(isAdmin || role === Role.ADMIN || role === Role.REVIEWER) && (
+                    <Link to="/admin" className={`nav-link flex items-center px-2 py-1 rounded-md ${isActive('/admin') ? 'bg-paper-light text-paper-primary' : 'text-gray-600 hover:text-paper-primary'}`}>
+                        <Users className="h-4 w-4 mr-1" />
+                        <span className="text-sm">管理</span>
+                    </Link>
+                  )}
               </Button>
             )}
           </nav>

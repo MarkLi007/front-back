@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
@@ -9,6 +9,8 @@ import PaperCard from "../components/PaperCard";
 import { FileText, Upload, Search, ChevronRight, Tag } from "lucide-react";
 import { getAllListedNFTs } from "../utils/graphql/nftMarket";
 import NFTCard from "../components/nft/NFTCard";
+import { api } from "@/utils/api";
+
 
 interface Paper {
   paperId: number;
@@ -26,6 +28,9 @@ export default function Index() {
   const [featuredNFTs, setFeaturedNFTs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(true);
+  const [hotPapers, setHotPapers] = useState<any[]>([]);
+  const [latestPapersList, setLatestPapersList] = useState<any[]>([]);
+  const [proposals, setProposals] = useState<any[]>([]);
 
   useEffect(() => {
     loadLatestPapers();
@@ -93,6 +98,24 @@ export default function Index() {
     }
   }
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const hotPapersData = await api.getHotPapers();
+        setHotPapers(hotPapersData);
+
+        const latestPapersData = await api.getLatestPapers();
+        setLatestPapersList(latestPapersData);
+
+        const proposalsData = await api.getProposals();
+        setProposals(proposalsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -157,7 +180,9 @@ export default function Index() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
+
               <h3 className="text-xl font-semibold mb-2">多方审核</h3>
+
               <p className="text-gray-600">支持多审稿人机制，确保论文质量，防止抄袭和学术不端行为。</p>
             </div>
             <div className="paper-card flex flex-col items-center text-center">
@@ -220,6 +245,21 @@ export default function Index() {
           )}
         </div>
       </section>
+          {/* Proposals Section */}
+          <section className="mb-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-paper-primary mb-8 text-center">治理模块</h2>
+          <ul>
+          {proposals.map((proposal,index) => (
+              <li key={index}>
+                <h3>{proposal.parameter_name}</h3>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+
 
       {/* NFT Marketplace Section */}
       <section className="mb-12">

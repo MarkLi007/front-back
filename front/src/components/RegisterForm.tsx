@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../utils/auth";
 import { Button } from "./ui/button";
+import { register } from "@/utils/auth";
 import { Input } from "./ui/input";
 import { UserPlus } from "lucide-react";
 import { toast } from "../hooks/use-toast";
@@ -13,11 +13,11 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
-  const [username, setUsername] = useState("");
+  const [wallet_address, setWalletAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -25,7 +25,7 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
     
     // Validation
     if (!username.trim() || !password.trim() || !email.trim()) {
-      toast({
+      setErrorMessage({
         title: "输入错误",
         description: "请填写所有必填字段",
         variant: "destructive"
@@ -34,7 +34,7 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
     }
     
     if (password !== confirmPassword) {
-      toast({
+      setErrorMessage({
         title: "密码不匹配",
         description: "两次输入的密码不一致",
         variant: "destructive"
@@ -42,46 +42,47 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
       return;
     }
     
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast({
-        title: "邮箱格式错误",
-        description: "请输入有效的邮箱地址",
-        variant: "destructive"
-      });
-      return;
-    }
     
     setIsLoading(true);
-    
+    setErrorMessage(null);
+
     try {
-      const { token, role } = await register(username, password, email);
-      
+        const result = await register(wallet_address, password);
+
+        if (!result) {
+            setErrorMessage("注册失败：未知错误。");
+            return;
+        }
+
       toast({
         title: "注册成功",
         description: "欢迎加入论文注册系统",
       });
-      
+
       if (onSuccess) {
         onSuccess();
       } else {
         navigate("/");
       }
     } catch (error) {
-      toast({
-        title: "注册失败",
-        description: (error as Error).message,
-        variant: "destructive"
-      });
+        console.error('注册失败:', error);
+        setErrorMessage('注册失败:' + (error instanceof Error ? error.message : "未知错误"));
     } finally {
       setIsLoading(false);
+      setWalletAddress('');
+      setPassword('');
+      setConfirmPassword('');
     }
   }
 
   return (
     <div className="paper-card max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-paper-primary mb-6">用户注册</h2>
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong className="font-bold">错误: </strong> {errorMessage}
+          </div>
+        )}
       
       <form onSubmit={handleSubmit} className="paper-form space-y-4">
         <div className="form-group">
@@ -89,21 +90,9 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
           <Input
             id="username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setWalletAddress(e.target.value)}
             placeholder="请输入用户名"
-            disabled={isLoading}
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="email">邮箱 <span className="text-red-500">*</span></label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="请输入邮箱"
+
             disabled={isLoading}
             required
           />
